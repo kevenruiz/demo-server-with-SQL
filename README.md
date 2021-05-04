@@ -12,7 +12,7 @@ Express Server with SQL on Heroku
 1. Run `heroku create`
 1. Run `npm run setup-heroku` to create:
     1. A production heroku SQL database in the cloud to go with your heroku app
-    1. A second dev heroku SQL database in the cloud to use when doing local development
+    1. A second dev heroku SQL database in the cloud to use when doing dev development
     1. It returns the `DEV_DATABASE_URL`
 1. Copy the `DEV_DATABASE_URL` from previous step, or run `npm run get-dev-db-url` to refetch the url
 
@@ -32,7 +32,7 @@ should be okay to re-run whole process. The purpose of `setup-db` is to restore 
 Change all the files in the `data` directory to match the data model of your app:
     1. `/data/create-tables.js` - SQL to create needed tables
     1. `/data/drop-tables.js` - SQL to drop all tables
-    1. Seed dataf file - data to load into the db as starter or "seed" data
+    1. Seed data file - data to load into the db as starter or "seed" data
     1. `/data/load-seed-data.js` - SQL to insert each item from the seed data array
 
 ## Running the server
@@ -44,3 +44,7 @@ Change all the files in the `data` directory to match the data model of your app
 - `/__tests__/app.test.js` contains testing file for routes. It has before code to run your db setup and after code to close the db connection
 - Use `npm run test:watch` to start tests in watch mode
 - Routes go in `app.js` (not `server.js`)
+
+postgres://xeyccauyfsshry:90b00893165d2248e232abb556241aab60ce3565938d0117df8838d92b54f9ad@ec2-35-174-35-242.compute-1.amazonaws.com:5432/dbpdoo7ljsnv6f
+
+protocol://user:password@host:port/database

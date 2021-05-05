@@ -7,34 +7,27 @@ const request = supertest(app);
 
 describe('API Routes', () => {
 
-  beforeAll(() => {
-    execSync('npm run setup-db');
-  });
-
   afterAll(async () => {
     return client.end();
   });
 
-  const expectedCats = [
-    {
+  describe('/api/cats', () => {
+
+    beforeAll(() => {
+      execSync('npm run recreate-tables');
+    });
+
+    let felix = {
       id: expect.any(Number),
       name: 'Felix',
       type: 'Tuxedo',
       url: 'cats/felix.png',
       year: 1892,
-      lives: 3,
+      lives: 5,
       isSidekick: false
-    },
-    {
-      id: expect.any(Number),
-      name: 'Garfield',
-      type: 'Orange Tabby',
-      url: 'cats/garfield.jpeg',
-      year: 1978,
-      lives: 7,
-      isSidekick: false
-    },
-    {
+    };
+  
+    let duchess = {
       id: expect.any(Number),
       name: 'Duchess',
       type: 'Angora',
@@ -42,44 +35,9 @@ describe('API Routes', () => {
       year: 1970,
       lives: 9,
       isSidekick: false
-    },
-    {
-      id: expect.any(Number),
-      name: 'Stimpy',
-      type: 'Manx',
-      url: 'cats/stimpy.jpeg',
-      year: 1990,
-      lives: 1,
-      isSidekick: true
-    },
-    {
-      id: expect.any(Number),
-      name: 'Sylvester',
-      type: 'Tuxedo',
-      url: 'cats/sylvester.jpeg',
-      year: 1945,
-      lives: 1,
-      isSidekick: true
-    },
-    {
-      id: expect.any(Number),
-      name: 'Tigger',
-      type: 'Orange Tabby',
-      url: 'cats/tigger.jpeg',
-      year: 1928,
-      lives: 8,
-      isSidekick: false
-    },
-    {
-      id: expect.any(Number),
-      name: 'Hello Kitty',
-      type: 'Angora',
-      url: 'cats/hello-kitty.jpeg',
-      year: 1974,
-      lives: 9,
-      isSidekick: false
-    },
-    {
+    };
+  
+    let hobbs = {
       id: expect.any(Number),
       name: 'Hobbs',
       type: 'Orange Tabby',
@@ -87,30 +45,91 @@ describe('API Routes', () => {
       year: 1985,
       lives: 6,
       isSidekick: true
-    }
-  ];
+    };
 
-  // If a GET request is made to /api/cats, does:
-  // 1) the server respond with status of 200
-  // 2) the body match the expected API data?
-  it('GET /api/cats', async () => {
-    // act - make the request
-    const response = await request.get('/api/cats');
+    it('POST felix to /api/cats', async () => {
+      const response = await request
+        .post('/api/cats')
+        .send(felix);
 
-    // was response OK (200)?
-    expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(felix);
+      
+      // Update local client felix object
+      felix = response.body;
+    });
 
-    // did it return the data we expected?
-    expect(response.body).toEqual(expectedCats);
+    it('PUT updated felix to /api/cats/:id', async () => {
+      felix.lives = 2;
+      felix.name = 'Mr. Felix';
+
+      const response = await request
+        .put(`/api/cats/${felix.id}`)
+        .send(felix);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(felix);
+
+    });
+
+    it('GET list of cats from /api/cats', async () => {
+      const r1 = await request.post('/api/cats').send(duchess);
+      duchess = r1.body;
+      const r2 = await request.post('/api/cats').send(hobbs);
+      hobbs = r2.body;
+
+      const response = await request.get('/api/cats');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(expect.arrayContaining([felix, duchess, hobbs]));
+    });
+
+    it('GET hobbs from /api/cats/:id', async () => {
+      const response = await request.get(`/api/cats/${hobbs.id}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(hobbs);
+    });
+
+    it('DELETE hobbs from /api/cats/:id', async () => {
+      const response = await request.delete(`/api/cats/${hobbs.id}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(hobbs);
+
+      const getResponse = await request.get('/api/cats');
+      expect(getResponse.status).toBe(200);
+      expect(getResponse.body).toEqual(expect.arrayContaining([felix, duchess]));
+    });
+
+  });  
+
+  describe('seed data tests', () => {
+
+    beforeAll(() => {
+      execSync('npm run setup-db');
+    });
+  
+    it('GET /api/cats', async () => {
+      // act - make the request
+      const response = await request.get('/api/cats');
+
+      // was response OK (200)?
+      expect(response.status).toBe(200);
+
+      // did it return some data?
+      expect(response.body.length).toBeGreaterThan(0);
+      
+      // did the data get inserted?
+      expect(response.body[0]).toEqual({
+        id: expect.any(Number),
+        name: expect.any(String),
+        type: expect.any(String),
+        url: expect.any(String),
+        year: expect.any(Number),
+        lives: expect.any(Number),
+        isSidekick: expect.any(Boolean)
+      });
+    });
 
   });
 
-  // If a GET request is made to /api/cats/:id, does:
-  // 1) the server respond with status of 200
-  // 2) the body match the expected API data for the cat with that id?
-  test('GET /api/cats/:id', async () => {
-    const response = await request.get('/api/cats/2');
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(expectedCats[1]);
-  });
 });

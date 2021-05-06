@@ -110,10 +110,10 @@ describe('API Routes', () => {
       expect(response.body).toEqual(expect.arrayContaining(expected));
     });
 
-    it.skip('GET hobbs from /api/cats/:id', async () => {
+    it('GET hobbs from /api/cats/:id', async () => {
       const response = await request.get(`/api/cats/${hobbs.id}`);
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(hobbs);
+      expect(response.body).toEqual({ ...hobbs, userName: user.name });
     });
 
     it.skip('DELETE hobbs from /api/cats/:id', async () => {

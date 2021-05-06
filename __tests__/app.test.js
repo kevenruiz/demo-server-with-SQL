@@ -129,13 +129,13 @@ describe('API Routes', () => {
 
   });  
 
-  describe.skip('seed data tests', () => {
+  describe('seed data tests', () => {
 
     beforeAll(() => {
       execSync('npm run setup-db');
     });
   
-    it.skip('GET /api/cats', async () => {
+    it('GET /api/cats', async () => {
       // act - make the request
       const response = await request.get('/api/cats');
 
@@ -153,7 +153,9 @@ describe('API Routes', () => {
         url: expect.any(String),
         year: expect.any(Number),
         lives: expect.any(Number),
-        isSidekick: expect.any(Boolean)
+        isSidekick: expect.any(Boolean),
+        userId: expect.any(Number),
+        userName: expect.any(String)
       });
     });
 

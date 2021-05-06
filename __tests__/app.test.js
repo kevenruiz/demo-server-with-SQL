@@ -116,14 +116,15 @@ describe('API Routes', () => {
       expect(response.body).toEqual({ ...hobbs, userName: user.name });
     });
 
-    it.skip('DELETE hobbs from /api/cats/:id', async () => {
+    it('DELETE hobbs from /api/cats/:id', async () => {
       const response = await request.delete(`/api/cats/${hobbs.id}`);
       expect(response.status).toBe(200);
       expect(response.body).toEqual(hobbs);
 
       const getResponse = await request.get('/api/cats');
       expect(getResponse.status).toBe(200);
-      expect(getResponse.body).toEqual(expect.arrayContaining([felix, duchess]));
+      expect(getResponse.body.find(cat => cat.id === hobbs.id)).toBeUndefined();
+
     });
 
   });  

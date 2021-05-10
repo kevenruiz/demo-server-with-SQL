@@ -13,8 +13,22 @@ describe('API Routes', () => {
 
   describe('/api/cats', () => {
 
-    beforeAll(() => {
+    let user;
+
+    beforeAll(async () => {
       execSync('npm run recreate-tables');
+
+      const response = await request
+        .post('/api/auth/signup')
+        .send({
+          name: 'Me the User',
+          email: 'me@user.com',
+          password: 'password'
+        });
+
+      expect(response.status).toBe(200);
+
+      user = response.body;
     });
 
     let felix = {
@@ -48,6 +62,7 @@ describe('API Routes', () => {
     };
 
     it('POST felix to /api/cats', async () => {
+      felix.userId = user.id;
       const response = await request
         .post('/api/cats')
         .send(felix);
@@ -73,21 +88,32 @@ describe('API Routes', () => {
     });
 
     it('GET list of cats from /api/cats', async () => {
+      duchess.userId = user.id;
       const r1 = await request.post('/api/cats').send(duchess);
       duchess = r1.body;
+
+      hobbs.userId = user.id;
       const r2 = await request.post('/api/cats').send(hobbs);
       hobbs = r2.body;
 
       const response = await request.get('/api/cats');
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(expect.arrayContaining([felix, duchess, hobbs]));
+      
+      const expected = [felix, duchess, hobbs].map(cat => {
+        return { 
+          userName: user.name,
+          ...cat 
+        };
+      });
+      
+      expect(response.body).toEqual(expect.arrayContaining(expected));
     });
 
     it('GET hobbs from /api/cats/:id', async () => {
       const response = await request.get(`/api/cats/${hobbs.id}`);
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(hobbs);
+      expect(response.body).toEqual({ ...hobbs, userName: user.name });
     });
 
     it('DELETE hobbs from /api/cats/:id', async () => {
@@ -97,7 +123,8 @@ describe('API Routes', () => {
 
       const getResponse = await request.get('/api/cats');
       expect(getResponse.status).toBe(200);
-      expect(getResponse.body).toEqual(expect.arrayContaining([felix, duchess]));
+      expect(getResponse.body.find(cat => cat.id === hobbs.id)).toBeUndefined();
+
     });
 
   });  
@@ -126,7 +153,9 @@ describe('API Routes', () => {
         url: expect.any(String),
         year: expect.any(Number),
         lives: expect.any(Number),
-        isSidekick: expect.any(Boolean)
+        isSidekick: expect.any(Boolean),
+        userId: expect.any(Number),
+        userName: expect.any(String)
       });
     });
 

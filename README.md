@@ -13,8 +13,8 @@ Express Server with SQL on Heroku
 1. Run `npm run setup-heroku` to create:
     1. A production heroku SQL database in the cloud to go with your heroku app
     1. A second dev heroku SQL database in the cloud to use when doing dev development
-    1. It returns the `DEV_DATABASE_URL`
-1. Copy the `DEV_DATABASE_URL` from previous step, or run `npm run get-dev-db-url` to refetch the url
+    1. It returns the dev database url for you to use locally
+1. Copy the url from previous step, or run `npm run get-dev-db-url` to refetch the url
 
 ### Create data models
 
